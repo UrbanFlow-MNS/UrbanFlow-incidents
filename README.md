@@ -15,53 +15,83 @@ Ce microservice gère l'ensemble du cycle de vie des incidents urbains, incluant
 
 - **TypeScript** - Langage principal
 - **Node.js** - Runtime
+- **TypeORM** - ORM pour PostgreSQL
 - **PostgreSQL** - Base de données
-- **Jest** - Framework de tests
+- **dotenv** - Configuration
 
 ## Structure du projet
 
 ```
 UrbanFlow-incidents/
 ├── src/
-│   └── models/           # Modèles TypeScript (interfaces)
-│       ├── incidentsEnums.ts
-│       ├── categoryModel.ts
-│       ├── userAccountModel.ts
-│       ├── technicianModel.ts
-│       ├── siteModel.ts
-│       ├── incidentModel.ts
-│       ├── assignmentModel.ts
-│       ├── interventionModel.ts
-│       ├── commentModel.ts
-│       └── attachmentModel.ts
-├── tests/                # Tests unitaires
-│   ├── enums.test.ts
-│   └── models.test.ts
-├── sql/                  # Scripts SQL
-│   └── incidents_schema.sql
+│   ├── models/              # Entités TypeORM
+│   │   ├── incidentsEnums.ts
+│   │   ├── categoryModel.ts
+│   │   ├── userAccountModel.ts
+│   │   ├── technicianModel.ts
+│   │   ├── siteModel.ts
+│   │   ├── incidentModel.ts
+│   │   ├── assignmentModel.ts
+│   │   ├── interventionModel.ts
+│   │   ├── commentModel.ts
+│   │   └── attachmentModel.ts
+│   ├── data-source.ts      # Configuration TypeORM
+│   ├── init-db.ts          # Script initialisation DB
+│   └── index.ts            # Point d'entrée
+├── .env.example            # Template configuration
 └── package.json
 ```
 
 ## Installation
 
 ```bash
+# Installer les dépendances
 npm install
+
+# Copier le fichier d'environnement
+cp .env.example .env
+
+# Éditer .env avec vos credentials PostgreSQL
+```
+
+## Configuration
+
+Créez un fichier `.env` à la racine :
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=votre_mot_de_passe
+DB_NAME=urbanflow_incidents
+NODE_ENV=development
 ```
 
 ## Base de données
 
-### Création du schéma
-
-Pour créer la base de données PostgreSQL :
+### Création de la base
 
 ```bash
+# Connexion à PostgreSQL
 psql -U postgres
+
+# Créer la base
 CREATE DATABASE urbanflow_incidents;
-\c urbanflow_incidents
-\i sql/incidents_schema.sql
 ```
 
+### Initialisation des tables
+
+TypeORM peut créer automatiquement les tables (mode développement) :
+
+```bash
+npm run db:init
+```
+
+En mode `synchronize: true`, TypeORM génère automatiquement le schéma à partir des entités.
+
 ### Structure des tables
+
+TypeORM gère automatiquement les tables suivantes :
 
 - `categories` - Catégories d'incidents
 - `user_accounts` - Comptes utilisateurs
@@ -73,24 +103,50 @@ CREATE DATABASE urbanflow_incidents;
 - `comments` - Commentaires sur les incidents
 - `attachments` - Pièces jointes
 
-## Tests
-
-### Exécuter tous les tests
+## Scripts npm
 
 ```bash
-npm test
+# Compiler TypeScript
+npm run build
+
+# Lancer en développement
+npm run dev
+
+# Initialiser/synchroniser la base de données
+npm run db:init
+
+# Commandes TypeORM
+npm run typeorm migration:generate -- -n NomMigration
+npm run typeorm migration:run
+npm run typeorm migration:revert
 ```
 
-### Mode watch (développement)
+## Utilisation
 
-```bash
-npm run test:watch
-```
+### Exemple d'utilisation des entités
 
-### Couverture de code
+```typescript
+import { AppDataSource } from './data-source';
+import { Category } from './models/categoryModel';
 
-```bash
-npm run test:coverage
+// Initialiser la connexion
+await AppDataSource.initialize();
+
+// Récupérer le repository
+const categoryRepo = AppDataSource.getRepository(Category);
+
+// Créer une catégorie
+const category = categoryRepo.create({
+  categoryName: 'Panne mécanique',
+  isActive: true
+});
+await categoryRepo.save(category);
+
+// Récupérer toutes les catégories
+const categories = await categoryRepo.find();
+
+// Fermer la connexion
+await AppDataSource.destroy();
 ```
 
 ## Modèles de données
