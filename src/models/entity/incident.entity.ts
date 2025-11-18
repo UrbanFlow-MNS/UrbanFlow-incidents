@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { SiteEntity } from './site.entity';
 import { CategoryEntity } from './category.entity';
 
@@ -16,7 +16,7 @@ export class IncidentEntity {
     @Column()
     description: string;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
     estimateDuration: string;
 
     @Column()
@@ -25,27 +25,29 @@ export class IncidentEntity {
     @Column()
     priority: string;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
     creationDate: Date;
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'datetime', nullable: true })
     resolutionDate?: Date;
 
     @Column()
     siteId: number;
 
     @ManyToOne(() => SiteEntity)
+    @JoinColumn({ name: 'siteId' })
     site: SiteEntity;
 
     @Column()
     categoryId: number;
 
     @ManyToOne(() => CategoryEntity)
+    @JoinColumn({ name: 'categoryId' })
     category: CategoryEntity;
 
     @Column()
     createdBy: number;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 }

@@ -11,11 +11,11 @@ export class InterventionEntity {
     userId: number | null;
 
     @ManyToOne(() => IncidentEntity)
-    @JoinColumn({ name: 'incidentId' })
+    @JoinColumn({ name: 'incidentId' }) 
     incident: IncidentEntity;
 
     @Column()
-    incidentId: number;
+    incidentId: number; 
 
     @ManyToOne(() => SiteEntity)
     @JoinColumn({ name: 'siteId' })
@@ -24,10 +24,10 @@ export class InterventionEntity {
     @Column()
     siteId: number;
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'datetime' })
     startAt: Date;
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'datetime', nullable: true })
     endAt?: Date;
 
     @Column({ type: 'text', nullable: true })
@@ -39,9 +39,9 @@ export class InterventionEntity {
     @Column ({ type : 'int', nullable: true })
     workTimes?: number;
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @CreateDateColumn({ type: 'datetime' })
     createdAt: Date;
 
-    @UpdateDateColumn({ type: 'timestamp' })
+    @UpdateDateColumn({ type: 'datetime' })
     updatedAt: Date;
 }
