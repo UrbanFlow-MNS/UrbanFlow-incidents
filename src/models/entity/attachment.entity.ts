@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity()
-export class Attachment {
+export class AttachmentEntity {
     @PrimaryGeneratedColumn()
     id: number;
 

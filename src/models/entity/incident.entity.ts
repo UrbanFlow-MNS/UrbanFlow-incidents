@@ -1,9 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Site } from './site.entity';
-import { Category } from './category.entity';
+import { SiteEntity } from './site.entity';
+import { CategoryEntity } from './category.entity';
 
 @Entity()
-export class Incident {
+export class IncidentEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -34,14 +34,14 @@ export class Incident {
     @Column()
     siteId: number;
 
-    @ManyToOne(() => Site)
-    site: Site;
+    @ManyToOne(() => SiteEntity)
+    site: SiteEntity;
 
     @Column()
     categoryId: number;
 
-    @ManyToOne(() => Category)
-    category: Category;
+    @ManyToOne(() => CategoryEntity)
+    category: CategoryEntity;
 
     @Column()
     createdBy: number;

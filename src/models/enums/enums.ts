@@ -1,5 +1,3 @@
- import { registerEnumType } from '@nestjs/postgresql';
-
 export enum InterventionStatus {
     PENDING = 'PENDING',
     IN_PROGRESS = 'IN_PROGRESS',
@@ -19,18 +17,3 @@ export enum IncidentStatus {
     RESOLVED = 'RESOLVED',
     CLOSED = 'CLOSED',
 }
-
-registerEnumType(IncidentStatus, {
-    name: 'IncidentStatus',
-    description: 'The status of an incident',
-});
-
-registerEnumType(InterventionStatus, {
-    name: 'InterventionStatus',
-    description: 'The status of an intervention',
-});
-
-registerEnumType(IncidentPriority, {
-    name: 'IncidentPriority',
-    description: 'The priority of an incident',
-});

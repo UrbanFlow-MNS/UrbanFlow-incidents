@@ -1,25 +1,25 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { Site } from './site.entity';
-import { Incident } from './incident.entity';
+import { SiteEntity } from './site.entity';
+import { IncidentEntity } from './incident.entity';
 
 @Entity()
-export class Intervention { 
+export class InterventionEntity { 
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column({ nullable: true })
     userId: number | null;
 
-    @ManyToOne(() => Incident)
+    @ManyToOne(() => IncidentEntity)
     @JoinColumn({ name: 'incidentId' })
-    incident: Incident;
+    incident: IncidentEntity;
 
     @Column()
     incidentId: number;
 
-    @ManyToOne(() => Site)
+    @ManyToOne(() => SiteEntity)
     @JoinColumn({ name: 'siteId' })
-    site: Site;
+    site: SiteEntity;
 
     @Column()
     siteId: number;
