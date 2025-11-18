@@ -1,5 +1,6 @@
 import { Site } from './site.models';
 import { Category } from './category.models';
+import { IncidentPriority, IncidentStatus } from '../enums/enums';
 
 export class Incident {
     id: number;
@@ -7,8 +8,8 @@ export class Incident {
     name: string;
     description: string;
     estimateDuration: number;
-    status: string;
-    priority: string;
+    status: IncidentStatus;
+    priority: IncidentPriority;
     creationDate: Date;
     resolutionDate?: Date;
     siteId: number;

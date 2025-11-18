@@ -1,5 +1,6 @@
 import { Site } from './site.models';
 import { Incident } from './incident.models';
+import { InterventionStatus } from '../enums/enums';
 
 export class Intervention {
     id: number;
@@ -8,6 +9,7 @@ export class Intervention {
     incidentId: number;
     site: Site;
     siteId: number;
+    status: InterventionStatus;
     startAt: Date;
     endAt?: Date;
     workNote?: string;
