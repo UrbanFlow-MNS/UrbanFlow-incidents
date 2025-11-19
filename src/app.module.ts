@@ -18,7 +18,7 @@ import { AttachmentEntity } from './models/entity/attachment.entity';
     }),
 
     TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as any,
+      type: "postgres",
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT),
       username: process.env.DB_USERNAME,
