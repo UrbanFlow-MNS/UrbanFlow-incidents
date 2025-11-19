@@ -30,7 +30,7 @@ export class InterventionEntity {
     @Column({ type: 'datetime', nullable: true })
     endAt?: Date;
 
-    @Column({ type: 'text', nullable: true })
+    @Column({ nullable: true })
     workNote?: string;
 
     @Column({ type : 'int', nullable: true })

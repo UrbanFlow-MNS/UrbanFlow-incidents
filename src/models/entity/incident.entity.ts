@@ -16,8 +16,8 @@ export class IncidentEntity {
     @Column()
     description: string;
 
-    @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
-    estimateDuration: string;
+    @Column({ type: 'int' })
+    estimateDuration: number;
 
     @Column()
     status: string;

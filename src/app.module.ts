@@ -11,6 +11,7 @@ import { AttachmentEntity } from './models/entity/attachment.entity';
 
 @Module({
   imports: [
+
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -32,7 +33,17 @@ import { AttachmentEntity } from './models/entity/attachment.entity';
       ],
       synchronize: true, // Enable on dev, disable on prod
     }),
+
+    TypeOrmModule.forFeature([
+      IncidentEntity,
+      CategoryEntity,
+      SiteEntity,
+      InterventionEntity,
+      AttachmentEntity,
+    ]),
+    
   ],
+  
   controllers: [AppController],
   providers: [AppService],
 })

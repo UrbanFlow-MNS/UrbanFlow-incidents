@@ -1,4 +1,4 @@
-export class Site {
+export class SiteModel {
     id: number;
     name: string;
     address: string;

@@ -1,8 +1,8 @@
-import { Site } from './site.models';
-import { Category } from './category.models';
+import { SiteModel } from './site.models';
+import { CategoryModel } from './category.models';
 import { IncidentPriority, IncidentStatus } from '../enums/enums';
 
-export class Incident {
+export class IncidentModel {
     id: number;
     code: string;
     name: string;
@@ -13,9 +13,9 @@ export class Incident {
     creationDate: Date;
     resolutionDate?: Date;
     siteId: number;
-    site: Site;
+    site: SiteModel;
     categoryId: number;
-    category: Category;
+    category: CategoryModel;
     createdBy: number;
     updatedAt: Date;
 }

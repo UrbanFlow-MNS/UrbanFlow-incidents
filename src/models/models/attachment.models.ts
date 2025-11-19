@@ -1,10 +1,10 @@
-import { Incident } from './incident.models';
+import { IncidentModel } from './incident.models';
 
-export class Attachment {
+export class AttachmentModel {
 
     id: number;
     incidentId: number;
-    incident: Incident;
+    incident: IncidentModel;
     updatedBy: number;
     contentUrl: string;
     contentType?: string;

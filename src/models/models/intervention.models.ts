@@ -1,13 +1,13 @@
-import { Site } from './site.models';
-import { Incident } from './incident.models';
+import { SiteModel } from './site.models';
+import { IncidentModel } from './incident.models';
 import { InterventionStatus } from '../enums/enums';
 
-export class Intervention {
+export class InterventionModel {
     id: number;
     userId: number | null;
-    incident: Incident;
+    incident: IncidentModel;
     incidentId: number;
-    site: Site;
+    site: SiteModel;
     siteId: number;
     status: InterventionStatus;
     startAt: Date;

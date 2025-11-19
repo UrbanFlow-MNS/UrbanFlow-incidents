@@ -17,7 +17,7 @@ export class AttachmentEntity {
     @Column({ nullable: true })
     contentType?: string;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 
 
