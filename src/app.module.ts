@@ -8,6 +8,11 @@ import { CategoryEntity } from './models/entity/category.entity';
 import { SiteEntity } from './models/entity/site.entity';
 import { InterventionEntity } from './models/entity/intervention.entity';
 import { AttachmentEntity } from './models/entity/attachment.entity';
+import { IncidentsModule } from './incidents/incidents.module';
+import { SitesModule } from './sites/sites.module';
+import { InterventionsModule } from './interventions/interventions.module';
+import { CategoriesModule } from './categories/categories.module';
+import { AttachmentsModule } from './attachments/attachments.module';
 
 @Module({
   imports: [
@@ -41,6 +46,16 @@ import { AttachmentEntity } from './models/entity/attachment.entity';
       InterventionEntity,
       AttachmentEntity,
     ]),
+
+    IncidentsModule,
+
+    SitesModule,
+
+    InterventionsModule,
+
+    CategoriesModule,
+
+    AttachmentsModule,
     
   ],
   
