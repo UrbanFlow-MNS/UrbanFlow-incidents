@@ -1,6 +1,7 @@
-import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsNumber } from 'class-validator';
 
 export class CreateIncidentDto {
+
 
     @IsString()
     @IsNotEmpty()
@@ -17,20 +18,18 @@ export class CreateIncidentDto {
     @IsNotEmpty()
     createdBy: string;
 
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
-    siteId: string;
+    siteId: number;
 
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
-    categoryId: string;
+    categoryId: number;
+    
+    @IsEnum(['Open', 'In Progress', 'Resolved', 'Closed'])
+    status: string;
 
-    @IsEnum()
-    @IsNotEmpty()
-    priority: Enumerator;
-
-    @IsEnum()
-    @IsNotEmpty()
-    status: Enumerator;
+    @IsEnum(['Low', 'Medium', 'High', 'Critical'])
+    priority: string;
 
 }
