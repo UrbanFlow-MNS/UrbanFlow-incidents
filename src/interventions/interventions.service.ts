@@ -12,7 +12,7 @@ export class InterventionsService {
     private readonly interventionRepository: Repository<InterventionEntity>,
   ) {}
 
-  async create(createInterventionDto: CreateInterventionDto) {
+  async create(createInterventionDto: CreateInterventionDto) { 
     const intervention = this.interventionRepository.create(createInterventionDto);
     return await this.interventionRepository.save(intervention);
   }

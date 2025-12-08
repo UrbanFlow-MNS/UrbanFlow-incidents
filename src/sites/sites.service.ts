@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SiteEntity } from '../models/entity/site.entity';
 
 @Injectable()
 export class SitesService {
-  create(createSiteDto: CreateSiteDto) {
-    return 'This action adds a new site';
+  constructor(
+    @InjectRepository(SiteEntity)
+    private readonly siteRepository: Repository<SiteEntity>,
+  ) {}
+  async create(createSiteDto: CreateSiteDto) {
+    const site = this.siteRepository.create(createSiteDto);
+    return await this.siteRepository.save(site);
   }
 
-  findAll() {
-    return `This action returns all sites`;
+  async findAll() {
+    return await this.siteRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} site`;
+  async findOne(id: number) {
+    await this.siteRepository.findOne({
+      where: { id },
+      relations: ['incidents'],
+    })
   }
 
-  update(id: number, updateSiteDto: UpdateSiteDto) {
-    return `This action updates a #${id} site`;
+  async update(id: number, updateSiteDto: UpdateSiteDto) {
+    await this.siteRepository.update(id, updateSiteDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} site`;
+  async remove(id: number) {
+    return await this.siteRepository.delete(id);
   }
 }

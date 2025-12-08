@@ -1,0 +1,12 @@
+services:
+  incidents-db:
+    image: postgres:15
+    env_file:
+      - .env.docker
+    ports:
+      - "5004:5432"
+    volumes:
+      - incidents-db:/var/lib/postgresql/data
+
+volumes:
+    incidents-db:
