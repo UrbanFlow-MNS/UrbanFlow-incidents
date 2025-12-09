@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumberString, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString } from "class-validator";
 
 export class CreateSiteDto {
 
@@ -18,11 +18,11 @@ export class CreateSiteDto {
     @IsNotEmpty()
     zipcode: string;
 
-    @IsNumberString() //Je ne sais pas si je dois mêttre un number, si ca pose problème, j'ai trouvé ca dans la doc
+    @IsNumber() //Je ne sais pas si je dois mêttre un number, si ca pose problème, j'ai trouvé ca dans la doc
     @IsNotEmpty()
     latitude: number;
 
-    @IsNumberString() // Same 
+    @IsNumber() // Same 
     @IsNotEmpty()
     longitude: number;
 

@@ -18,17 +18,17 @@ export class SitesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.sitesService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.sitesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSiteDto: UpdateSiteDto) {
-    return this.sitesService.update(+id, updateSiteDto);
+  update(@Param('id') id: number, @Body() updateSiteDto: UpdateSiteDto) {
+    return this.sitesService.update(id, updateSiteDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sitesService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.sitesService.remove(id);
   }
 }

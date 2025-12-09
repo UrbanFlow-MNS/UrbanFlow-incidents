@@ -10,7 +10,7 @@ export class IncidentModel {
     estimateDuration: number;
     status: IncidentStatus;
     priority: IncidentPriority;
-    creationDate: Date;
+    createdAt: Date;
     resolutionDate?: Date;
     siteId: number;
     site: SiteModel;

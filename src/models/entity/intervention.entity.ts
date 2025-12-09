@@ -39,9 +39,9 @@ export class InterventionEntity {
     @Column ({ type : 'int', nullable: true })
     workTimes?: number;
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @CreateDateColumn()
     createdAt: Date;
 
-    @UpdateDateColumn({ type: 'timestamp' })
+    @UpdateDateColumn()
     updatedAt: Date;
 }

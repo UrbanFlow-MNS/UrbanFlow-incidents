@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsEnum, IsNumber } from 'class-validator';
-
+import { IncidentStatus } from 'src/models/enums/enums';
+import { IncidentPriority } from 'src/models/enums/enums';
 export class CreateIncidentDto {
 
 
@@ -26,10 +27,10 @@ export class CreateIncidentDto {
     @IsNotEmpty()
     categoryId: number;
     
-    @IsEnum(['Open', 'In Progress', 'Resolved', 'Closed'])
+    @IsEnum(IncidentStatus)
     status: string;
 
-    @IsEnum(['Low', 'Medium', 'High', 'Critical'])
+    @IsEnum(IncidentPriority)
     priority: string;
 
 }

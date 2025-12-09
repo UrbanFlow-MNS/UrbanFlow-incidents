@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { SiteEntity } from './site.entity';
 import { CategoryEntity } from './category.entity';
 
@@ -25,8 +25,11 @@ export class IncidentEntity {
     @Column()
     priority: string;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    creationDate: Date;
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 
     @Column({ type: 'timestamp', nullable: true })
     resolutionDate?: Date;
@@ -48,6 +51,4 @@ export class IncidentEntity {
     @Column()
     createdBy: number;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    updatedAt: Date;
 }
