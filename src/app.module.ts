@@ -8,22 +8,24 @@ import { CategoryEntity } from './models/entity/category.entity';
 import { SiteEntity } from './models/entity/site.entity';
 import { InterventionEntity } from './models/entity/intervention.entity';
 import { AttachmentEntity } from './models/entity/attachment.entity';
+import { IncidentsModule } from './incidents/incidents.module';
+import { SitesModule } from './sites/sites.module';
+import { InterventionsModule } from './interventions/interventions.module';
+import { CategoriesModule } from './categories/categories.module';
+import { AttachmentsModule } from './attachments/attachments.module';
 
 @Module({
   imports: [
 
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
 
     TypeOrmModule.forRoot({
-      type: "postgres",
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST,
+      port: Number(process.env.POSTGRES_PORT),
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
       entities: [
         IncidentEntity,
         CategoryEntity,
@@ -31,7 +33,7 @@ import { AttachmentEntity } from './models/entity/attachment.entity';
         InterventionEntity,
         AttachmentEntity,
       ],
-      synchronize: true, // Enable on dev, disable on prod
+      synchronize: Boolean(process.env.POSTGRES_SYNCHRONISE), // Enable on dev, disable on prod
     }),
 
     TypeOrmModule.forFeature([
@@ -41,6 +43,16 @@ import { AttachmentEntity } from './models/entity/attachment.entity';
       InterventionEntity,
       AttachmentEntity,
     ]),
+
+    IncidentsModule,
+
+    SitesModule,
+
+    InterventionsModule,
+
+    CategoriesModule,
+
+    AttachmentsModule,
     
   ],
   

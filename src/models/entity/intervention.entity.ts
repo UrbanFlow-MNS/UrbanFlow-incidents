@@ -14,20 +14,20 @@ export class InterventionEntity {
     @JoinColumn({ name: 'incidentId' }) 
     incident: IncidentEntity;
 
-    @Column()
+    @Column()  
     incidentId: number; 
 
     @ManyToOne(() => SiteEntity)
     @JoinColumn({ name: 'siteId' })
     site: SiteEntity;
 
-    @Column()
+    @Column({ nullable: true })
     siteId: number;
 
-    @Column({ type: 'datetime' })
+    @Column({ type: 'timestamp' })
     startAt: Date;
 
-    @Column({ type: 'datetime', nullable: true })
+    @Column({ type: 'timestamp', nullable: true })
     endAt?: Date;
 
     @Column({ nullable: true })
@@ -39,9 +39,9 @@ export class InterventionEntity {
     @Column ({ type : 'int', nullable: true })
     workTimes?: number;
 
-    @CreateDateColumn({ type: 'datetime' })
+    @CreateDateColumn()
     createdAt: Date;
 
-    @UpdateDateColumn({ type: 'datetime' })
+    @UpdateDateColumn()
     updatedAt: Date;
 }

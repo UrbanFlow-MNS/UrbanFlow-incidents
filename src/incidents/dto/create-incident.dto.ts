@@ -1,0 +1,36 @@
+import { IsString, IsNotEmpty, IsEnum, IsNumber } from 'class-validator';
+import { IncidentStatus } from 'src/models/enums/enums';
+import { IncidentPriority } from 'src/models/enums/enums';
+export class CreateIncidentDto {
+
+
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+
+    @IsString()
+    @IsNotEmpty()
+    title: string;
+
+    @IsString()
+    description: string;
+
+    @IsString()
+    @IsNotEmpty()
+    createdBy: string;
+
+    @IsNumber()
+    @IsNotEmpty()
+    siteId: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    categoryId: number;
+    
+    @IsEnum(IncidentStatus)
+    status: string;
+
+    @IsEnum(IncidentPriority)
+    priority: string;
+
+}
