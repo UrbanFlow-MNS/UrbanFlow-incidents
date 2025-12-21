@@ -3,6 +3,9 @@ import { IncidentStatus } from 'src/models/enums/enums';
 import { IncidentPriority } from 'src/models/enums/enums';
 export class CreateIncidentDto {
 
+    @IsString()
+    @IsNotEmpty()
+    code: string;
 
     @IsString()
     @IsNotEmpty()
@@ -14,6 +17,10 @@ export class CreateIncidentDto {
 
     @IsString()
     description: string;
+
+    @IsNumber()
+    @IsNotEmpty()
+    estimateDuration: number;
 
     @IsNumber()
     @IsNotEmpty()
