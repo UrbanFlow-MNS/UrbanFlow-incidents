@@ -15,9 +15,9 @@ export class CreateIncidentDto {
     @IsString()
     description: string;
 
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
-    createdBy: string;
+    createdBy: number;
 
     @IsNumber()
     @IsNotEmpty()

@@ -21,10 +21,10 @@ export class SitesService {
   }
 
   async findOne(id: number) {
-    await this.siteRepository.findOne({
+    return await this.siteRepository.findOne({
       where: { id },
       relations: ['incidents'],
-    })
+    });
   }
 
   async update(id: number, updateSiteDto: UpdateSiteDto) {
