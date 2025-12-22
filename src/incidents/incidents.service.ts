@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { CreateIncidentDto } from './dto/create-incident.dto';
+import { Repository } from 'typeorm';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
-
+import { InjectRepository } from '@nestjs/typeorm';
+import { IncidentEntity } from '../models/entity/incident.entity';
 @Injectable()
 export class IncidentsService {
-  create(createIncidentDto: CreateIncidentDto) {
-    return 'This action adds a new incident';
+  constructor(
+    @InjectRepository(IncidentEntity)
+    private readonly incidentRepository: Repository<IncidentEntity>,
+  ) {}
+
+  async create(createIncidentDto: CreateIncidentDto) {
+    const incident = this.incidentRepository.create(createIncidentDto);
+    return await this.incidentRepository.save(incident);
   }
 
-  findAll() {
-    return `This action returns all incidents`;
+  async findAll() {
+    return await this.incidentRepository.find({
+      relations: ['category', 'site'],
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} incident`;
+  async findOne(id: number) {
+    return await this.incidentRepository.findOne({
+      where: { id },
+      relations: ['category', 'site'],
+    });
   }
 
-  update(id: number, updateIncidentDto: UpdateIncidentDto) {
-    return `This action updates a #${id} incident`;
+  async update(id: number, updateIncidentDto: UpdateIncidentDto) {
+    await this.incidentRepository.update(id, updateIncidentDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} incident`;
+  async remove(id: number) {
+    await this.incidentRepository.delete(id);
   }
 }

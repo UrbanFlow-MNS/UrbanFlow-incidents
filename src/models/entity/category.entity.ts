@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { IncidentEntity } from './incident.entity';
 
 @Entity()
 export class CategoryEntity {
@@ -10,4 +11,7 @@ export class CategoryEntity {
 
     @Column()
     isActive: boolean;
+
+    @OneToMany(() => IncidentEntity, (incident) => incident.category)
+    incidents: IncidentEntity[];
 }
