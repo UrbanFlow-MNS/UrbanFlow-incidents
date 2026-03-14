@@ -1,19 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { Repository } from 'typeorm';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IncidentEntity } from '../models/entity/incident.entity';
+
 @Injectable()
 export class IncidentsService {
   constructor(
     @InjectRepository(IncidentEntity)
     private readonly incidentRepository: Repository<IncidentEntity>,
+    @Inject('NOTIFICATIONS_SERVICE')
+    private readonly notificationsClient: ClientProxy,
   ) {}
 
   async create(createIncidentDto: CreateIncidentDto) {
     const incident = this.incidentRepository.create(createIncidentDto);
-    return await this.incidentRepository.save(incident);
+    const saved = await this.incidentRepository.save(incident);
+
+    // Publier un message vers le service notifications via RabbitMQ
+    this.notificationsClient.emit('notifications.sendEmail', {
+      email: process.env.NOTIFICATION_DEFAULT_EMAIL ?? 'admin@urbanflow.fr',
+      object: `[Incident] ${saved.title} - Priorité : ${saved.priority}`,
+      body: `Un nouvel incident a été créé.\n\nNom : ${saved.name}\nDescription : ${saved.description}\nStatut : ${saved.status}\nPriorité : ${saved.priority}`,
+    });
+
+    return saved;
   }
 
   async findAll() {
