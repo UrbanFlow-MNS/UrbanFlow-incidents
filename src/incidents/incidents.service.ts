@@ -22,8 +22,8 @@ export class IncidentsService {
     // Publier un message vers le service notifications via RabbitMQ
     this.notificationsClient.emit('notifications.sendEmail', {
       email: process.env.NOTIFICATION_DEFAULT_EMAIL ?? 'admin@urbanflow.fr',
-      object: `[Incident] ${saved.name} - Priorité : ${saved.priority}`,
-      body: `Un nouvel incident a été créé.\n\nCode : ${saved.code}\nNom : ${saved.name}\nDescription : ${saved.description}\nStatut : ${saved.status}\nPriorité : ${saved.priority}`,
+      object: `[Incident] ${saved.title} - Priorité : ${saved.priority}`,
+      body: `Un nouvel incident a été créé.\n\nCode : ${saved.code}\nNom : ${saved.name}\nTitre : ${saved.title}\nDescription : ${saved.description}\nStatut : ${saved.status}\nPriorité : ${saved.priority}`,
     });
 
     return saved;
