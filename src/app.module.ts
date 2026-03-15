@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { IncidentEntity } from './models/entity/incident.entity';
 import { CategoryEntity } from './models/entity/category.entity';
 import { SiteEntity } from './models/entity/site.entity';
@@ -53,6 +54,18 @@ import { AttachmentsModule } from './attachments/attachments.module';
     CategoriesModule,
 
     AttachmentsModule,
+
+    ClientsModule.register([
+      {
+        name: 'NOTIFICATIONS_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBIT_MQ ?? 'amqp://localhost:5672'],
+          queue: 'NOTIFICATIONS_QUEUE',
+          queueOptions: { durable: false },
+        },
+      },
+    ]),
     
   ],
   

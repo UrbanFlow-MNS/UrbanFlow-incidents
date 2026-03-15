@@ -1,19 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { Repository } from 'typeorm';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IncidentEntity } from '../models/entity/incident.entity';
+
 @Injectable()
 export class IncidentsService {
   constructor(
     @InjectRepository(IncidentEntity)
     private readonly incidentRepository: Repository<IncidentEntity>,
+    @Inject('NOTIFICATIONS_SERVICE')
+    private readonly notificationsClient: ClientProxy,
   ) {}
 
   async create(createIncidentDto: CreateIncidentDto) {
     const incident = this.incidentRepository.create(createIncidentDto);
-    return await this.incidentRepository.save(incident);
+    const saved = await this.incidentRepository.save(incident);
+
+    this.notificationsClient.emit('notifications.sendEmail', {
+      email: process.env.NOTIFICATION_DEFAULT_EMAIL ?? 'urban.flow.moselle@gmail.com',
+      object: `[Incident] ${saved.title} - Priorité : ${saved.priority}`,
+      body: `Un nouvel incident a été créé.
+
+      Code : ${saved.code}
+      Nom : ${saved.name}
+      Titre : ${saved.title}
+      Description : ${saved.description}
+      Statut : ${saved.status}
+      Priorité : ${saved.priority}`,
+      
+    });
+
+    return saved;
   }
 
   async findAll() {

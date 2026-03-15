@@ -14,6 +14,9 @@ export class IncidentEntity {
     name: string;
 
     @Column()
+    title: string;
+
+    @Column()
     description: string;
 
     @Column({ type: 'int' })
