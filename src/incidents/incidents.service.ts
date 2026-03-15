@@ -19,11 +19,18 @@ export class IncidentsService {
     const incident = this.incidentRepository.create(createIncidentDto);
     const saved = await this.incidentRepository.save(incident);
 
-    // Publier un message vers le service notifications via RabbitMQ
     this.notificationsClient.emit('notifications.sendEmail', {
-      email: process.env.NOTIFICATION_DEFAULT_EMAIL ?? 'admin@urbanflow.fr',
+      email: process.env.NOTIFICATION_DEFAULT_EMAIL ?? 'urban.flow.moselle@gmail.com',
       object: `[Incident] ${saved.title} - Priorité : ${saved.priority}`,
-      body: `Un nouvel incident a été créé.\n\nCode : ${saved.code}\nNom : ${saved.name}\nTitre : ${saved.title}\nDescription : ${saved.description}\nStatut : ${saved.status}\nPriorité : ${saved.priority}`,
+      body: `Un nouvel incident a été créé.
+
+      Code : ${saved.code}
+      Nom : ${saved.name}
+      Titre : ${saved.title}
+      Description : ${saved.description}
+      Statut : ${saved.status}
+      Priorité : ${saved.priority}`,
+      
     });
 
     return saved;
