@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { IncidentsService } from './incidents.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
@@ -30,5 +31,30 @@ export class IncidentsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.incidentsService.remove(+id);
+  }
+
+  @MessagePattern({ cmd: 'incident.findAll' })
+  findAllTcp() {
+    return this.incidentsService.findAll();
+  }
+
+  @MessagePattern({ cmd: 'incident.findOne' })
+  findOneTcp(@Payload() id: number) {
+    return this.incidentsService.findOne(id);
+  }
+
+  @MessagePattern({ cmd: 'incident.create' })
+  createTcp(@Payload() createIncidentDto: CreateIncidentDto) {
+    return this.incidentsService.create(createIncidentDto);
+  }
+
+  @MessagePattern({ cmd: 'incident.update' })
+  updateTcp(@Payload() data: { id: number; dto: UpdateIncidentDto }) {
+    return this.incidentsService.update(data.id, data.dto);
+  }
+
+  @MessagePattern({ cmd: 'incident.remove' })
+  removeTcp(@Payload() id: number) {
+    return this.incidentsService.remove(id);
   }
 }
