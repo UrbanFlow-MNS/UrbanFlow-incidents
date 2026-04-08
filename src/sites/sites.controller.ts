@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SitesService } from './sites.service';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
@@ -31,4 +32,30 @@ export class SitesController {
   remove(@Param('id') id: number) {
     return this.sitesService.remove(id);
   }
+
+  @MessagePattern({ cmd: 'site.findAll' })
+  findAllTcp() {
+    return this.sitesService.findAll();
+  }
+
+  @MessagePattern({ cmd: 'site.findOne' })
+  findOneTcp(@Payload() id: number) {
+    return this.sitesService.findOne(id);
+  }
+
+  @MessagePattern({ cmd: 'site.create' })
+  createTcp(@Payload() createSiteDto: CreateSiteDto) {
+    return this.sitesService.create(createSiteDto);
+  }
+
+  @MessagePattern({ cmd: 'site.update' })
+  updateTcp(@Payload() data: { id: number; dto: UpdateSiteDto }) {
+    return this.sitesService.update(data.id, data.dto);
+  }
+
+  @MessagePattern({ cmd: 'site.remove' })
+  removeTcp(@Payload() id: number) {
+    return this.sitesService.remove(id);
+  }
 }
+
