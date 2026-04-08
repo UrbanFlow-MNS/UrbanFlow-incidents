@@ -45,7 +45,6 @@ export class SitesController {
 
   @MessagePattern({ cmd: 'site.create' })
   createTcp(@Payload() createSiteDto: CreateSiteDto) {
-    console.log("Received create site command with data (incidents service):", createSiteDto);
     return this.sitesService.create(createSiteDto);
   }
 
