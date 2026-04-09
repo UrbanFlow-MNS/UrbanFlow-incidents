@@ -1,21 +1,38 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { Repository } from 'typeorm';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IncidentEntity } from '../models/entity/incident.entity';
+import { SiteEntity } from '../models/entity/site.entity';
+import { CategoryEntity } from '../models/entity/category.entity';
 
 @Injectable()
 export class IncidentsService {
   constructor(
     @InjectRepository(IncidentEntity)
     private readonly incidentRepository: Repository<IncidentEntity>,
+    @InjectRepository(SiteEntity)
+    private readonly siteRepository: Repository<SiteEntity>,
+    @InjectRepository(CategoryEntity)
+    private readonly categoryRepository: Repository<CategoryEntity>,
     @Inject('NOTIFICATIONS_SERVICE')
     private readonly notificationsClient: ClientProxy,
   ) {}
 
   async create(createIncidentDto: CreateIncidentDto) {
+    const site = await this.siteRepository.findOne({ where: { id: createIncidentDto.siteId } });
+    if (!site) {
+      throw new RpcException({ statusCode: 404, message: `Site with id ${createIncidentDto.siteId} not found` });
+    }
+
+    const category = await this.categoryRepository.findOne({ where: { id: createIncidentDto.categoryId } });
+    if (!category) {
+      throw new RpcException({ statusCode: 404, message: `Category with id ${createIncidentDto.categoryId} not found` });
+    }
+
     const incident = this.incidentRepository.create(createIncidentDto);
     const saved = await this.incidentRepository.save(incident);
 
