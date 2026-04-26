@@ -20,6 +20,8 @@ export class IncidentsService {
     private readonly categoryRepository: Repository<CategoryEntity>,
     @Inject('NOTIFICATIONS_SERVICE')
     private readonly notificationsClient: ClientProxy,
+    @Inject('TRIPS_SERVICE')
+    private readonly tripsClient: ClientProxy,
   ) {}
 
   async create(createIncidentDto: CreateIncidentDto) {
@@ -35,6 +37,16 @@ export class IncidentsService {
 
     const incident = this.incidentRepository.create(createIncidentDto);
     const saved = await this.incidentRepository.save(incident);
+
+    this.tripsClient.emit('incident.created', {
+      incidentId: saved.id,
+      siteId: saved.siteId,
+      estimateDuration: saved.estimateDuration,
+      priority: saved.priority,
+      status: saved.status,
+      affectedStopIds: createIncidentDto.affectedStopIds ?? [],
+      affectedRouteIds: createIncidentDto.affectedRouteIds ?? [],
+    });
 
     this.notificationsClient.emit('notifications.sendEmail', {
       email: process.env.NOTIFICATION_DEFAULT_EMAIL ?? 'urban.flow.moselle@gmail.com',
