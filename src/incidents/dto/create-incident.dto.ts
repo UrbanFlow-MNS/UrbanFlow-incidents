@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEnum, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsNumber, IsArray, IsOptional } from 'class-validator';
 import { IncidentStatus } from 'src/models/enums/enums';
 import { IncidentPriority } from 'src/models/enums/enums';
 export class CreateIncidentDto {
@@ -39,5 +39,15 @@ export class CreateIncidentDto {
 
     @IsEnum(IncidentPriority)
     priority: string;
+
+    @IsArray()
+    @IsNumber({}, { each: true })
+    @IsOptional()
+    affectedStopIds?: number[];
+
+    @IsArray()
+    @IsNumber({}, { each: true })
+    @IsOptional()
+    affectedRouteIds?: number[];
 
 }

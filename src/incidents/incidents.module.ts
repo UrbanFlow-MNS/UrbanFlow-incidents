@@ -20,6 +20,15 @@ import { CategoryEntity } from '../models/entity/category.entity';
           queueOptions: { durable: false },
         },
       },
+      {
+        name: 'TRIPS_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBIT_MQ ?? 'amqp://localhost:5672'],
+          queue: 'INCIDENTS_QUEUE',
+          queueOptions: { durable: true },
+        },
+      },
     ]),
   ],
   controllers: [IncidentsController],
