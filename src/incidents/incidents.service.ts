@@ -84,7 +84,8 @@ export class IncidentsService {
     const updated = await this.findOne(id);
 
     if (
-      updateIncidentDto.status === IncidentStatus.RESOLVED || updateIncidentDto.status === IncidentStatus.CLOSED
+      (updateIncidentDto.status as IncidentStatus) === IncidentStatus.RESOLVED ||
+      (updateIncidentDto.status as IncidentStatus) === IncidentStatus.CLOSED
     ) {
       this.tripsClient.emit('incident.closed', { incidentId: id });
     }
