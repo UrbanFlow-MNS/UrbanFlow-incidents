@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IncidentEntity } from '../models/entity/incident.entity';
+import { IncidentStatus } from '../models/enums/enums';
 import { SiteEntity } from '../models/entity/site.entity';
 import { CategoryEntity } from '../models/entity/category.entity';
 
@@ -80,10 +81,20 @@ export class IncidentsService {
 
   async update(id: number, updateIncidentDto: UpdateIncidentDto) {
     await this.incidentRepository.update(id, updateIncidentDto);
-    return this.findOne(id);
+    const updated = await this.findOne(id);
+
+    if (
+      (updateIncidentDto.status as IncidentStatus) === IncidentStatus.RESOLVED ||
+      (updateIncidentDto.status as IncidentStatus) === IncidentStatus.CLOSED
+    ) {
+      this.tripsClient.emit('incident.closed', { incidentId: id });
+    }
+
+    return updated;
   }
 
   async remove(id: number) {
+    this.tripsClient.emit('incident.closed', { incidentId: id });
     await this.incidentRepository.delete(id);
   }
 }

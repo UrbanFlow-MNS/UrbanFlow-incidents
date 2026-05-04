@@ -23,4 +23,4 @@ async function bootstrap() {
   await app.startAllMicroservices();
   await app.listen(Number(process.env.API_PORT) || 3000);
 }
-bootstrap();
+void bootstrap();
