@@ -14,6 +14,8 @@ import { SitesModule } from './sites/sites.module';
 import { InterventionsModule } from './interventions/interventions.module';
 import { CategoriesModule } from './categories/categories.module';
 import { AttachmentsModule } from './attachments/attachments.module';
+import { PrometheusController } from './prometheus/prometheus.controller';
+import { PrometheusService } from './prometheus/prometheus.service';
 
 @Module({
   imports: [
@@ -66,10 +68,18 @@ import { AttachmentsModule } from './attachments/attachments.module';
         },
       },
     ]),
-    
   ],
   
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, PrometheusController],
+  providers: [
+    
+      AppService,
+
+      PrometheusService,
+    {
+      provide: 'IPrometheusService',
+      useClass: PrometheusService,
+    },
+  ],
 })
 export class AppModule {}
