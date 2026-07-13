@@ -54,4 +54,6 @@ export class IncidentEntity {
     @Column()
     createdBy: number;
 
+    @Column()
+    affectedRouteIds: number[];
 }

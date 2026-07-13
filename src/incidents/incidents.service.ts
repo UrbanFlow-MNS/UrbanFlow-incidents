@@ -1,5 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { Repository } from 'typeorm';
@@ -28,12 +27,12 @@ export class IncidentsService {
   async create(createIncidentDto: CreateIncidentDto) {
     const site = await this.siteRepository.findOne({ where: { id: createIncidentDto.siteId } });
     if (!site) {
-      throw new RpcException({ statusCode: 404, message: `Site with id ${createIncidentDto.siteId} not found` });
+      throw new NotFoundException(`Site with id ${createIncidentDto.siteId} not found`);
     }
 
     const category = await this.categoryRepository.findOne({ where: { id: createIncidentDto.categoryId } });
     if (!category) {
-      throw new RpcException({ statusCode: 404, message: `Category with id ${createIncidentDto.categoryId} not found` });
+      throw new NotFoundException(`Category with id ${createIncidentDto.categoryId} not found`);
     }
 
     const incident = this.incidentRepository.create(createIncidentDto);

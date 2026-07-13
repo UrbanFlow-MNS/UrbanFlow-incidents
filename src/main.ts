@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { GlobalRpcExceptionFilter } from './filters/rpc-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +14,8 @@ async function bootstrap() {
       port: Number(process.env.TCP_PORT) || 6004,
     },
   });
+
+  app.useGlobalFilters(new GlobalRpcExceptionFilter());
 
   app.useGlobalPipes(new ValidationPipe({
     transform: true,
