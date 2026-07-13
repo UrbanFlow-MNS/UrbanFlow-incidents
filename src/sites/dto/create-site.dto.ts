@@ -16,7 +16,7 @@ export class CreateSiteDto {
 
     @IsString()
     @IsNotEmpty()
-    zipcode: string;
+    zipcode: string; 
 
     @IsNumber() //Je ne sais pas si je dois mêttre un number, si ca pose problème, j'ai trouvé ca dans la doc
     @IsNotEmpty()
