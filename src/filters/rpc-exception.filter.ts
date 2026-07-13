@@ -1,6 +1,11 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { Response } from 'express';
 import { throwError } from 'rxjs';
+
+interface HttpExceptionResponseBody {
+  message?: string;
+}
 
 @Catch()
 export class GlobalRpcExceptionFilter implements ExceptionFilter {
@@ -13,7 +18,7 @@ export class GlobalRpcExceptionFilter implements ExceptionFilter {
         const res = exception.getResponse();
         return throwError(() => ({
           statusCode: exception.getStatus(),
-          message: typeof res === 'string' ? res : (res as any).message,
+          message: typeof res === 'string' ? res : (res as HttpExceptionResponseBody).message,
         }));
       }
       return throwError(() => ({
@@ -21,8 +26,8 @@ export class GlobalRpcExceptionFilter implements ExceptionFilter {
         message: exception instanceof Error ? exception.message : 'Internal server error',
       }));
     }
-   
-    const response = host.switchToHttp().getResponse();
+
+    const response = host.switchToHttp().getResponse<Response>();
     if (exception instanceof HttpException) {
       return response.status(exception.getStatus()).json(exception.getResponse());
     }
