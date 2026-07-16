@@ -94,6 +94,6 @@ export class IncidentsService {
 
   async remove(id: number) {
     this.tripsClient.emit('incident.closed', { incidentId: id });
-    await this.incidentRepository.delete(id);
+    return await this.incidentRepository.delete(id);
   }
 }
