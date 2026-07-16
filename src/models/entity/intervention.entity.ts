@@ -10,8 +10,8 @@ export class InterventionEntity {
     @Column({ nullable: true })
     userId: number | null;
 
-    @ManyToOne(() => IncidentEntity)
-    @JoinColumn({ name: 'incidentId' }) 
+    @ManyToOne(() => IncidentEntity, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'incidentId' })
     incident: IncidentEntity;
 
     @Column()  

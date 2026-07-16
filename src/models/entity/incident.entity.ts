@@ -54,6 +54,6 @@ export class IncidentEntity {
     @Column()
     createdBy: number;
 
-    @Column()
+    @Column('int', { array: true, nullable: true })
     affectedRouteIds: number[];
 }
