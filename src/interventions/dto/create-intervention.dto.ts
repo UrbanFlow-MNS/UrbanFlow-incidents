@@ -20,6 +20,7 @@ export class CreateInterventionDto {
 
     @IsDate()
     @Type(() => Date)
+    @IsOptional()
     endAt?: Date;
 
     @IsString()

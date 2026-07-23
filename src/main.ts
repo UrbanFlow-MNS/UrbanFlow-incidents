@@ -7,14 +7,6 @@ import { GlobalRpcExceptionFilter } from './filters/rpc-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.TCP,
-    options: {
-      host: '0.0.0.0',
-      port: Number(process.env.TCP_PORT) || 6004,
-    },
-  });
-
   app.useGlobalFilters(new GlobalRpcExceptionFilter());
 
   app.useGlobalPipes(new ValidationPipe({
@@ -22,6 +14,14 @@ async function bootstrap() {
     whitelist: true,
     exceptionFactory: () => new BadRequestException('A required field is missing'),
   }));
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.TCP,
+    options: {
+      host: '0.0.0.0',
+      port: Number(process.env.TCP_PORT) || 6004,
+    },
+  }, { inheritAppConfig: true });
 
   await app.startAllMicroservices();
   await app.listen(Number(process.env.API_PORT) || 3000);
