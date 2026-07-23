@@ -23,7 +23,6 @@ export class SitesService {
   async findOne(id: number) {
     return await this.siteRepository.findOne({
       where: { id },
-      relations: ['incidents'],
     });
   }
 
