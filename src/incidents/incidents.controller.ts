@@ -49,12 +49,12 @@ export class IncidentsController {
   }
 
   @MessagePattern({ cmd: 'incident.update' })
-  updateTcp(@Payload() data: { id: number; dto: UpdateIncidentDto }) {
-    return this.incidentsService.update(data.id, data.dto);
+  updateTcp(@Payload() data: { id: number; dto: UpdateIncidentDto; callerId?: number; callerRole?: string }) {
+    return this.incidentsService.update(data.id, data.dto, data.callerId, data.callerRole);
   }
 
   @MessagePattern({ cmd: 'incident.remove' })
-  removeTcp(@Payload() id: number) {
-    return this.incidentsService.remove(id);
+  removeTcp(@Payload() data: { id: number; callerId?: number; callerRole?: string }) {
+    return this.incidentsService.remove(data.id, data.callerId, data.callerRole);
   }
 }

@@ -1,5 +1,7 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc, ClientProxy } from '@nestjs/microservices';
+import { Metadata } from '@grpc/grpc-js';
+import { firstValueFrom, Observable } from 'rxjs';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { Repository } from 'typeorm';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
@@ -8,9 +10,12 @@ import { IncidentEntity } from '../models/entity/incident.entity';
 import { IncidentStatus } from '../models/enums/enums';
 import { SiteEntity } from '../models/entity/site.entity';
 import { CategoryEntity } from '../models/entity/category.entity';
+import { UserDtoGrpc, UserServiceClient, USER_SERVICE_NAME } from '../../../proto/generated/typescript/user';
 
 @Injectable()
-export class IncidentsService {
+export class IncidentsService implements OnModuleInit {
+  private userService!: UserServiceClient;
+
   constructor(
     @InjectRepository(IncidentEntity)
     private readonly incidentRepository: Repository<IncidentEntity>,
@@ -22,7 +27,30 @@ export class IncidentsService {
     private readonly notificationsClient: ClientProxy,
     @Inject('TRIPS_SERVICE')
     private readonly tripsClient: ClientProxy,
+    @Inject('USER_PACKAGE')
+    private readonly userClient: ClientGrpc,
   ) {}
+
+  onModuleInit() {
+    this.userService = this.userClient.getService<UserServiceClient>(USER_SERVICE_NAME);
+  }
+
+  private async getCallerAgencyId(callerId?: number): Promise<number | undefined> {
+    if (!callerId) return undefined;
+
+    const meta = new Metadata();
+    meta.add('x-internal-secret', process.env.USER_INTERNAL_SECRET ?? '');
+
+    const fn = this.userService['findOneById'] as unknown as (
+      req: unknown,
+      metadata: Metadata,
+    ) => Observable<{ user?: UserDtoGrpc }>;
+
+    const res: { user?: UserDtoGrpc } = await firstValueFrom(
+      fn.call(this.userService, { id: callerId }, meta),
+    );
+    return res?.user?.agencyId;
+  }
 
   async create(createIncidentDto: CreateIncidentDto) {
     const site = await this.siteRepository.findOne({ where: { id: createIncidentDto.siteId } });
@@ -35,7 +63,9 @@ export class IncidentsService {
       throw new NotFoundException(`Category with id ${createIncidentDto.categoryId} not found`);
     }
 
-    const incident = this.incidentRepository.create(createIncidentDto);
+    const agencyId = await this.getCallerAgencyId(createIncidentDto.callerId);
+
+    const incident = this.incidentRepository.create({ ...createIncidentDto, agencyId });
     const saved = await this.incidentRepository.save(incident);
 
     this.tripsClient.emit('incident.created', {
@@ -78,7 +108,22 @@ export class IncidentsService {
     });
   }
 
-  async update(id: number, updateIncidentDto: UpdateIncidentDto) {
+  private async assertSameAgency(id: number, callerId?: number, callerRole?: string) {
+    if (callerRole === 'SUPERADMIN') return;
+
+    const incident = await this.incidentRepository.findOne({ where: { id } });
+    if (!incident) {
+      throw new NotFoundException(`Incident with id ${id} not found`);
+    }
+
+    const callerAgencyId = await this.getCallerAgencyId(callerId);
+    if (incident.agencyId !== callerAgencyId) {
+      throw new NotFoundException(`Incident with id ${id} not found`);
+    }
+  }
+
+  async update(id: number, updateIncidentDto: UpdateIncidentDto, callerId?: number, callerRole?: string) {
+    await this.assertSameAgency(id, callerId, callerRole);
     await this.incidentRepository.update(id, updateIncidentDto);
     const updated = await this.findOne(id);
 
@@ -92,7 +137,8 @@ export class IncidentsService {
     return updated;
   }
 
-  async remove(id: number) {
+  async remove(id: number, callerId?: number, callerRole?: string) {
+    await this.assertSameAgency(id, callerId, callerRole);
     this.tripsClient.emit('incident.closed', { incidentId: id });
     return await this.incidentRepository.delete(id);
   }

@@ -50,4 +50,8 @@ export class CreateIncidentDto {
     @IsOptional()
     affectedRouteIds?: number[];
 
+    @IsNumber()
+    @IsOptional()
+    callerId?: number;
+
 }
