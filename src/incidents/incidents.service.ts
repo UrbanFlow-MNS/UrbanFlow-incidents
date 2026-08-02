@@ -41,13 +41,13 @@ export class IncidentsService implements OnModuleInit {
     const meta = new Metadata();
     meta.add('x-internal-secret', process.env.USER_INTERNAL_SECRET ?? '');
 
-    const call = this.userService.findOneById as unknown as (
+    const fn = this.userService['findOneById'] as unknown as (
       req: unknown,
       metadata: Metadata,
     ) => Observable<{ user?: UserDtoGrpc }>;
 
     const res: { user?: UserDtoGrpc } = await firstValueFrom(
-      call.call(this.userService, { id: callerId }, meta),
+      fn.call(this.userService, { id: callerId }, meta),
     );
     return res?.user?.agencyId;
   }
