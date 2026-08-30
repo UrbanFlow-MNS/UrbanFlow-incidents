@@ -117,7 +117,7 @@ export class IncidentsService implements OnModuleInit {
     }
 
     const callerAgencyId = await this.getCallerAgencyId(callerId);
-    if (incident.agencyId !== callerAgencyId) {
+    if ((incident.agencyId ?? null) !== (callerAgencyId ?? null)) {
       throw new NotFoundException(`Incident with id ${id} not found`);
     }
   }
