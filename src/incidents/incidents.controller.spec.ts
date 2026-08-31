@@ -55,6 +55,12 @@ describe('IncidentsController', () => {
     expect(service.remove).toHaveBeenCalledWith(4, 7, 'TECHNICIAN');
   });
 
+  it('still accepts a plain id on remove', async () => {
+    await controller.removeTcp(4);
+
+    expect(service.remove).toHaveBeenCalledWith(4);
+  });
+
   it('reads incidents over tcp', async () => {
     await controller.findAllTcp();
     expect(service.findAll).toHaveBeenCalled();
