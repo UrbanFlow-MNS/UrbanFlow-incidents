@@ -54,7 +54,10 @@ export class IncidentsController {
   }
 
   @MessagePattern({ cmd: 'incident.remove' })
-  removeTcp(@Payload() data: { id: number; callerId?: number; callerRole?: string }) {
+  removeTcp(@Payload() data: { id: number; callerId?: number; callerRole?: string } | number) {
+    if (typeof data === 'number') {
+      return this.incidentsService.remove(data);
+    }
     return this.incidentsService.remove(data.id, data.callerId, data.callerRole);
   }
 }
