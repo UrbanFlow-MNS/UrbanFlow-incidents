@@ -28,9 +28,15 @@ import { testDatabase } from './test-database';
 const TCP_PORT = 6099;
 
 const TOULON = 7;
+const HYERES = 8;
+const SANS_AGENCE = 4;
+const SUPERADMIN = 6;
 
 const agencies: Record<number, number | undefined> = {
   [TOULON]: 1,
+  [HYERES]: 2,
+  [SANS_AGENCE]: undefined,
+  [SUPERADMIN]: undefined,
 };
 
 describe('Incidents (e2e)', () => {
@@ -224,6 +230,117 @@ describe('Incidents (e2e)', () => {
       expect(
         (created as unknown as Record<string, unknown>).champInconnu,
       ).toBeUndefined();
+    });
+  });
+
+  describe('cloisonnement par agence', () => {
+    let incidentToulon: number;
+
+    beforeEach(async () => {
+      const created = await createIncident({ callerId: TOULON });
+      incidentToulon = created.id;
+    });
+
+    it('rattache l incident à l agence de son auteur', async () => {
+      expect(findOneById).toHaveBeenCalledWith(
+        { id: TOULON },
+        expect.anything(),
+      );
+
+      const found = await send<IncidentEntity>(
+        'incident.findOne',
+        incidentToulon,
+      );
+      expect(found.agencyId).toBe(1);
+    });
+
+    it('ignore une agence imposée par le client', async () => {
+      const created = await createIncident({ callerId: TOULON, agencyId: 2 });
+
+      expect(created.agencyId).toBe(1);
+    });
+
+    it('empêche une autre agence de modifier l incident', async () => {
+      await expect(
+        send('incident.update', {
+          id: incidentToulon,
+          dto: { title: 'tentative' },
+          callerId: HYERES,
+        }),
+      ).rejects.toMatchObject({ statusCode: 404 });
+    });
+
+    it('empêche une autre agence de supprimer l incident', async () => {
+      await expect(
+        send('incident.remove', { id: incidentToulon, callerId: HYERES }),
+      ).rejects.toMatchObject({ statusCode: 404 });
+    });
+
+    it('laisse l agence propriétaire modifier l incident', async () => {
+      const updated = await send<IncidentEntity>('incident.update', {
+        id: incidentToulon,
+        dto: { title: 'correction locale' },
+        callerId: TOULON,
+      });
+
+      expect(updated.title).toBe('correction locale');
+    });
+
+    it('laisse un superadmin agir sur toutes les agences', async () => {
+      const updated = await send<IncidentEntity>('incident.update', {
+        id: incidentToulon,
+        dto: { title: 'correction globale' },
+        callerId: SUPERADMIN,
+        callerRole: 'SUPERADMIN',
+      });
+
+      expect(updated.title).toBe('correction globale');
+    });
+
+    it('laisse un utilisateur sans agence modifier son propre incident', async () => {
+      const created = await createIncident({ callerId: SANS_AGENCE });
+
+      const updated = await send<IncidentEntity>('incident.update', {
+        id: created.id,
+        dto: { title: 'sans agence' },
+        callerId: SANS_AGENCE,
+      });
+
+      expect(updated.title).toBe('sans agence');
+    });
+  });
+
+  describe('interventions liées', () => {
+    it('supprime les interventions rattachées à un incident supprimé', async () => {
+      const incident = await createIncident({ callerId: TOULON });
+
+      const intervention = await request(app.getHttpServer())
+        .post('/interventions')
+        .send({
+          incidentId: incident.id,
+          siteId,
+          startAt: new Date().toISOString(),
+          workNote: 'remplacement du feu',
+        })
+        .expect(201);
+
+      await send('incident.remove', { id: incident.id, callerId: TOULON });
+
+      const interventionId = (intervention.body as { id: number }).id;
+      const res = await request(app.getHttpServer())
+        .get(`/interventions/${interventionId}`)
+        .expect(200);
+      expect(res.body).toEqual({});
+    });
+
+    it('refuse une intervention sur un incident inconnu', async () => {
+      await expect(
+        send('intervention.create', {
+          incidentId: 999999,
+          siteId,
+          startAt: new Date().toISOString(),
+        }),
+      ).rejects.toMatchObject({ statusCode: 404 });
     });
   });
 });
