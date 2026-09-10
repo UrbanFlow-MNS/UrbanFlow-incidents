@@ -167,6 +167,15 @@ describe('IncidentsService', () => {
       expect(incidentRepository.update).toHaveBeenCalledWith(3, { title: 'nouveau titre' });
     });
 
+    it('updates an incident without agency when the caller has none either', async () => {
+      incidentRepository.findOne.mockResolvedValue({ id: 3, agencyId: null });
+      findOneById.mockReturnValue(of({ user: { id: 4 } }));
+
+      await service.update(3, { title: 'nouveau titre' }, 4);
+
+      expect(incidentRepository.update).toHaveBeenCalledWith(3, { title: 'nouveau titre' });
+    });
+
     it('lets a superadmin update any incident without checking the agency', async () => {
       incidentRepository.findOne.mockResolvedValue({ id: 3, agencyId: 2 });
 
