@@ -1,3 +1,4 @@
+import { Mock, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { SitesService } from './sites.service';
@@ -5,7 +6,7 @@ import { SiteEntity } from '../models/entity/site.entity';
 
 describe('SitesService', () => {
   let service: SitesService;
-  let repository: Record<string, jest.Mock>;
+  let repository: Record<string, Mock>;
 
   const dto = {
     name: 'Depot Nord',
@@ -18,12 +19,12 @@ describe('SitesService', () => {
 
   beforeEach(async () => {
     repository = {
-      create: jest.fn((payload: unknown) => payload),
-      save: jest.fn((entity: object) => Promise.resolve({ id: 1, ...entity })),
-      find: jest.fn().mockResolvedValue([]),
-      findOne: jest.fn().mockResolvedValue({ id: 1 }),
-      update: jest.fn().mockResolvedValue({ affected: 1 }),
-      delete: jest.fn().mockResolvedValue({ affected: 1 }),
+      create: vi.fn((payload: unknown) => payload),
+      save: vi.fn((entity: object) => Promise.resolve({ id: 1, ...entity })),
+      find: vi.fn().mockResolvedValue([]),
+      findOne: vi.fn().mockResolvedValue({ id: 1 }),
+      update: vi.fn().mockResolvedValue({ affected: 1 }),
+      delete: vi.fn().mockResolvedValue({ affected: 1 }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
