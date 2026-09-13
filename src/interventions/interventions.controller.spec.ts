@@ -1,18 +1,19 @@
+import { Mock, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { InterventionsController } from './interventions.controller';
 import { InterventionsService } from './interventions.service';
 
 describe('InterventionsController', () => {
   let controller: InterventionsController;
-  let service: Record<string, jest.Mock>;
+  let service: Record<string, Mock>;
 
   beforeEach(async () => {
     service = {
-      create: jest.fn().mockResolvedValue({ id: 1 }),
-      findAll: jest.fn().mockResolvedValue([]),
-      findOne: jest.fn().mockResolvedValue({ id: 1 }),
-      update: jest.fn().mockResolvedValue({ id: 1 }),
-      remove: jest.fn().mockResolvedValue({ affected: 1 }),
+      create: vi.fn().mockResolvedValue({ id: 1 }),
+      findAll: vi.fn().mockResolvedValue([]),
+      findOne: vi.fn().mockResolvedValue({ id: 1 }),
+      update: vi.fn().mockResolvedValue({ id: 1 }),
+      remove: vi.fn().mockResolvedValue({ affected: 1 }),
     };
 
     const module: TestingModule = await Test.createTestingModule({

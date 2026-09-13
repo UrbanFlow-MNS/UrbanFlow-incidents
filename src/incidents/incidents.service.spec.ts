@@ -1,3 +1,4 @@
+import { Mock, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
@@ -10,12 +11,12 @@ import { IncidentPriority, IncidentStatus } from '../models/enums/enums';
 
 describe('IncidentsService', () => {
   let service: IncidentsService;
-  let incidentRepository: Record<string, jest.Mock>;
-  let siteRepository: Record<string, jest.Mock>;
-  let categoryRepository: Record<string, jest.Mock>;
-  let notificationsClient: Record<string, jest.Mock>;
-  let tripsClient: Record<string, jest.Mock>;
-  let findOneById: jest.Mock;
+  let incidentRepository: Record<string, Mock>;
+  let siteRepository: Record<string, Mock>;
+  let categoryRepository: Record<string, Mock>;
+  let notificationsClient: Record<string, Mock>;
+  let tripsClient: Record<string, Mock>;
+  let findOneById: Mock;
 
   const baseDto = {
     code: 'INC-001',
@@ -32,19 +33,19 @@ describe('IncidentsService', () => {
 
   beforeEach(async () => {
     incidentRepository = {
-      create: jest.fn((dto: unknown) => dto),
-      save: jest.fn((entity: object) => Promise.resolve({ id: 10, ...entity })),
-      find: jest.fn(),
-      findOne: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+      create: vi.fn((dto: unknown) => dto),
+      save: vi.fn((entity: object) => Promise.resolve({ id: 10, ...entity })),
+      find: vi.fn(),
+      findOne: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
     };
 
-    siteRepository = { findOne: jest.fn().mockResolvedValue({ id: 1 }) };
-    categoryRepository = { findOne: jest.fn().mockResolvedValue({ id: 1 }) };
-    notificationsClient = { emit: jest.fn() };
-    tripsClient = { emit: jest.fn() };
-    findOneById = jest.fn().mockReturnValue(of({ user: { id: 7, agencyId: 1 } }));
+    siteRepository = { findOne: vi.fn().mockResolvedValue({ id: 1 }) };
+    categoryRepository = { findOne: vi.fn().mockResolvedValue({ id: 1 }) };
+    notificationsClient = { emit: vi.fn() };
+    tripsClient = { emit: vi.fn() };
+    findOneById = vi.fn().mockReturnValue(of({ user: { id: 7, agencyId: 1 } }));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

@@ -1,3 +1,4 @@
+import { Mock, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RpcException } from '@nestjs/microservices';
@@ -9,9 +10,9 @@ import { InterventionStatus } from '../models/enums/enums';
 
 describe('InterventionsService', () => {
   let service: InterventionsService;
-  let interventionRepository: Record<string, jest.Mock>;
-  let siteRepository: Record<string, jest.Mock>;
-  let incidentRepository: Record<string, jest.Mock>;
+  let interventionRepository: Record<string, Mock>;
+  let siteRepository: Record<string, Mock>;
+  let incidentRepository: Record<string, Mock>;
 
   const dto = {
     title: 'Remplacement du feu',
@@ -24,15 +25,15 @@ describe('InterventionsService', () => {
 
   beforeEach(async () => {
     interventionRepository = {
-      create: jest.fn((payload: unknown) => payload),
-      save: jest.fn((entity: object) => Promise.resolve({ id: 1, ...entity })),
-      find: jest.fn().mockResolvedValue([]),
-      findOne: jest.fn().mockResolvedValue({ id: 1 }),
-      update: jest.fn().mockResolvedValue({ affected: 1 }),
-      delete: jest.fn().mockResolvedValue({ affected: 1 }),
+      create: vi.fn((payload: unknown) => payload),
+      save: vi.fn((entity: object) => Promise.resolve({ id: 1, ...entity })),
+      find: vi.fn().mockResolvedValue([]),
+      findOne: vi.fn().mockResolvedValue({ id: 1 }),
+      update: vi.fn().mockResolvedValue({ affected: 1 }),
+      delete: vi.fn().mockResolvedValue({ affected: 1 }),
     };
-    siteRepository = { findOne: jest.fn().mockResolvedValue({ id: 1 }) };
-    incidentRepository = { findOne: jest.fn().mockResolvedValue({ id: 1 }) };
+    siteRepository = { findOne: vi.fn().mockResolvedValue({ id: 1 }) };
+    incidentRepository = { findOne: vi.fn().mockResolvedValue({ id: 1 }) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

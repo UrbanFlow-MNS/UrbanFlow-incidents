@@ -7,7 +7,7 @@ export class InterventionEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ nullable: true })
+    @Column({ type: 'int', nullable: true })
     userId: number | null;
 
     @ManyToOne(() => IncidentEntity, { onDelete: 'CASCADE' })

@@ -1,3 +1,4 @@
+import { Mock, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
@@ -11,7 +12,8 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as request from 'supertest';
+import request from 'supertest';
+import { App } from 'supertest/types';
 import { firstValueFrom, of } from 'rxjs';
 import { IncidentsModule } from '../src/incidents/incidents.module';
 import { SitesModule } from '../src/sites/sites.module';
@@ -40,9 +42,9 @@ const agencies: Record<number, number | undefined> = {
 };
 
 describe('Incidents (e2e)', () => {
-  let app: INestApplication;
+  let app: INestApplication<App>;
   let client: ClientProxy;
-  let findOneById: jest.Mock;
+  let findOneById: Mock;
   let siteId: number;
   let categoryId: number;
 
@@ -67,7 +69,7 @@ describe('Incidents (e2e)', () => {
     send<IncidentEntity>('incident.create', payload(extra));
 
   beforeAll(async () => {
-    findOneById = jest.fn((req: { id: number }) =>
+    findOneById = vi.fn((req: { id: number }) =>
       of({ user: { id: req.id, agencyId: agencies[req.id] } }),
     );
 
@@ -90,9 +92,9 @@ describe('Incidents (e2e)', () => {
       ],
     })
       .overrideProvider('NOTIFICATIONS_SERVICE')
-      .useValue({ emit: jest.fn() })
+      .useValue({ emit: vi.fn() })
       .overrideProvider('TRIPS_SERVICE')
-      .useValue({ emit: jest.fn() })
+      .useValue({ emit: vi.fn() })
       .overrideProvider('USER_PACKAGE')
       .useValue({ getService: () => ({ findOneById }) })
       .compile();
