@@ -1,7 +1,7 @@
 import { Mock, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { of } from 'rxjs';
 import { IncidentsService } from './incidents.service';
 import { IncidentEntity } from '../models/entity/incident.entity';
@@ -45,7 +45,7 @@ describe('IncidentsService', () => {
     categoryRepository = { findOne: vi.fn().mockResolvedValue({ id: 1 }) };
     notificationsClient = { emit: vi.fn() };
     tripsClient = { emit: vi.fn() };
-    findOneById = vi.fn().mockReturnValue(of({ user: { id: 7, agencyId: 1 } }));
+    findOneById = vi.fn().mockReturnValue(of({ user: { id: 7, agencyId: 1, role: 'USER_CITY' } }));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -97,6 +97,20 @@ describe('IncidentsService', () => {
       expect(incidentRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({ agencyId: 1 }),
       );
+    });
+
+    it('refuses a traveler', async () => {
+      findOneById.mockReturnValue(of({ user: { id: 9, role: 'CLASSIC_USER' } }));
+
+      await expect(service.create({ ...baseDto, callerId: 9 })).rejects.toThrow(ForbiddenException);
+      expect(incidentRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('refuses a caller unknown to the user service', async () => {
+      findOneById.mockReturnValue(of({}));
+
+      await expect(service.create({ ...baseDto, callerId: 9 })).rejects.toThrow(ForbiddenException);
+      expect(incidentRepository.save).not.toHaveBeenCalled();
     });
 
     it('leaves the agency empty when there is no caller', async () => {
@@ -170,11 +184,19 @@ describe('IncidentsService', () => {
 
     it('updates an incident without agency when the caller has none either', async () => {
       incidentRepository.findOne.mockResolvedValue({ id: 3, agencyId: null });
-      findOneById.mockReturnValue(of({ user: { id: 4 } }));
+      findOneById.mockReturnValue(of({ user: { id: 4, role: 'TECHNICIAN' } }));
 
       await service.update(3, { title: 'nouveau titre' }, 4);
 
       expect(incidentRepository.update).toHaveBeenCalledWith(3, { title: 'nouveau titre' });
+    });
+
+    it('refuses a traveler', async () => {
+      incidentRepository.findOne.mockResolvedValue({ id: 3, agencyId: null });
+      findOneById.mockReturnValue(of({ user: { id: 9, role: 'CLASSIC_USER' } }));
+
+      await expect(service.update(3, {}, 9)).rejects.toThrow(ForbiddenException);
+      expect(incidentRepository.update).not.toHaveBeenCalled();
     });
 
     it('lets a superadmin update any incident without checking the agency', async () => {
@@ -217,6 +239,14 @@ describe('IncidentsService', () => {
 
       await expect(service.remove(3, 7)).resolves.toEqual({ affected: 1 });
       expect(tripsClient.emit).toHaveBeenCalledWith('incident.closed', { incidentId: 3 });
+    });
+
+    it('refuses a traveler', async () => {
+      incidentRepository.findOne.mockResolvedValue({ id: 3, agencyId: null });
+      findOneById.mockReturnValue(of({ user: { id: 9, role: 'CLASSIC_USER' } }));
+
+      await expect(service.remove(3, 9)).rejects.toThrow(ForbiddenException);
+      expect(incidentRepository.delete).not.toHaveBeenCalled();
     });
 
     it('lets a superadmin delete any incident', async () => {
