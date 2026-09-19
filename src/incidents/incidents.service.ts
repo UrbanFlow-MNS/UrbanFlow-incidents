@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, ClientProxy } from '@nestjs/microservices';
 import { Metadata } from '@grpc/grpc-js';
 import { firstValueFrom, Observable } from 'rxjs';
@@ -10,7 +10,15 @@ import { IncidentEntity } from '../models/entity/incident.entity';
 import { IncidentStatus } from '../models/enums/enums';
 import { SiteEntity } from '../models/entity/site.entity';
 import { CategoryEntity } from '../models/entity/category.entity';
-import { UserDtoGrpc, UserServiceClient, USER_SERVICE_NAME } from '../../../proto/generated/typescript/user';
+import { UserDtoGrpc, UserRoleType, UserServiceClient, USER_SERVICE_NAME } from '../../../proto/generated/typescript/user';
+
+const WRITE_ROLES = [
+  UserRoleType.TECHNICIAN,
+  UserRoleType.ADMIN_TECHNICIAN,
+  UserRoleType.USER_CITY,
+  UserRoleType.ADMIN_USER_CITY,
+  UserRoleType.SUPERADMIN,
+];
 
 @Injectable()
 export class IncidentsService implements OnModuleInit {
@@ -35,7 +43,7 @@ export class IncidentsService implements OnModuleInit {
     this.userService = this.userClient.getService<UserServiceClient>(USER_SERVICE_NAME);
   }
 
-  private async getCallerAgencyId(callerId?: number): Promise<number | undefined> {
+  private async getCaller(callerId?: number): Promise<UserDtoGrpc | undefined> {
     if (!callerId) return undefined;
 
     const meta = new Metadata();
@@ -49,7 +57,11 @@ export class IncidentsService implements OnModuleInit {
     const res: { user?: UserDtoGrpc } = await firstValueFrom(
       fn.call(this.userService, { id: callerId }, meta),
     );
-    return res?.user?.agencyId;
+    const caller = res?.user;
+    if (!caller || !WRITE_ROLES.includes(caller.role)) {
+      throw new ForbiddenException('You are not allowed to manage incidents');
+    }
+    return caller;
   }
 
   async create(createIncidentDto: CreateIncidentDto) {
@@ -63,9 +75,9 @@ export class IncidentsService implements OnModuleInit {
       throw new NotFoundException(`Category with id ${createIncidentDto.categoryId} not found`);
     }
 
-    const agencyId = await this.getCallerAgencyId(createIncidentDto.callerId);
+    const caller = await this.getCaller(createIncidentDto.callerId);
 
-    const incident = this.incidentRepository.create({ ...createIncidentDto, agencyId });
+    const incident = this.incidentRepository.create({ ...createIncidentDto, agencyId: caller?.agencyId });
     const saved = await this.incidentRepository.save(incident);
 
     this.tripsClient.emit('incident.created', {
@@ -116,8 +128,8 @@ export class IncidentsService implements OnModuleInit {
       throw new NotFoundException(`Incident with id ${id} not found`);
     }
 
-    const callerAgencyId = await this.getCallerAgencyId(callerId);
-    if ((incident.agencyId ?? null) !== (callerAgencyId ?? null)) {
+    const caller = await this.getCaller(callerId);
+    if ((incident.agencyId ?? null) !== (caller?.agencyId ?? null)) {
       throw new NotFoundException(`Incident with id ${id} not found`);
     }
   }

@@ -33,12 +33,14 @@ const TOULON = 7;
 const HYERES = 8;
 const SANS_AGENCE = 4;
 const SUPERADMIN = 6;
+const VOYAGEUR = 9;
 
-const agencies: Record<number, number | undefined> = {
-  [TOULON]: 1,
-  [HYERES]: 2,
-  [SANS_AGENCE]: undefined,
-  [SUPERADMIN]: undefined,
+const users: Record<number, { agencyId?: number; role: string }> = {
+  [TOULON]: { agencyId: 1, role: 'USER_CITY' },
+  [HYERES]: { agencyId: 2, role: 'USER_CITY' },
+  [SANS_AGENCE]: { role: 'TECHNICIAN' },
+  [SUPERADMIN]: { role: 'SUPERADMIN' },
+  [VOYAGEUR]: { role: 'CLASSIC_USER' },
 };
 
 describe('Incidents (e2e)', () => {
@@ -70,7 +72,7 @@ describe('Incidents (e2e)', () => {
 
   beforeAll(async () => {
     findOneById = vi.fn((req: { id: number }) =>
-      of({ user: { id: req.id, agencyId: agencies[req.id] } }),
+      of({ user: { id: req.id, ...users[req.id] } }),
     );
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -309,6 +311,40 @@ describe('Incidents (e2e)', () => {
       });
 
       expect(updated.title).toBe('sans agence');
+    });
+  });
+
+  describe('droits par rôle', () => {
+    it('laisse un superadmin créer un incident', async () => {
+      const created = await createIncident({ callerId: SUPERADMIN });
+
+      expect(created.id).toBeDefined();
+    });
+
+    it('refuse la création d un incident par un voyageur', async () => {
+      await expect(
+        createIncident({ callerId: VOYAGEUR }),
+      ).rejects.toMatchObject({ statusCode: 403 });
+    });
+
+    it('refuse la modification d un incident sans agence par un voyageur', async () => {
+      const created = await createIncident({ callerId: SANS_AGENCE });
+
+      await expect(
+        send('incident.update', {
+          id: created.id,
+          dto: { title: 'tentative' },
+          callerId: VOYAGEUR,
+        }),
+      ).rejects.toMatchObject({ statusCode: 403 });
+    });
+
+    it('refuse la suppression d un incident sans agence par un voyageur', async () => {
+      const created = await createIncident({ callerId: SANS_AGENCE });
+
+      await expect(
+        send('incident.remove', { id: created.id, callerId: VOYAGEUR }),
+      ).rejects.toMatchObject({ statusCode: 403 });
     });
   });
 
