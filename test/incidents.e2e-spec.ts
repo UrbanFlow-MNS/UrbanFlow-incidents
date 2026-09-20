@@ -19,6 +19,7 @@ import { IncidentsModule } from '../src/incidents/incidents.module';
 import { SitesModule } from '../src/sites/sites.module';
 import { CategoriesModule } from '../src/categories/categories.module';
 import { InterventionsModule } from '../src/interventions/interventions.module';
+import { AttachmentsModule } from '../src/attachments/attachments.module';
 import { IncidentEntity } from '../src/models/entity/incident.entity';
 import { SiteEntity } from '../src/models/entity/site.entity';
 import { CategoryEntity } from '../src/models/entity/category.entity';
@@ -91,6 +92,7 @@ describe('Incidents (e2e)', () => {
         SitesModule,
         CategoriesModule,
         InterventionsModule,
+        AttachmentsModule,
       ],
     })
       .overrideProvider('NOTIFICATIONS_SERVICE')
@@ -128,24 +130,21 @@ describe('Incidents (e2e)', () => {
     });
     await client.connect();
 
-    const site = await request(app.getHttpServer())
-      .post('/sites')
-      .send({
-        name: 'Depot Nord',
-        address: '12 rue des Ateliers',
-        city: 'Metz',
-        zipcode: '57000',
-        latitude: 49.1193,
-        longitude: 6.1757,
-      })
-      .expect(201);
-    siteId = (site.body as { id: number }).id;
+    const site = await send<{ id: number }>('site.create', {
+      name: 'Depot Nord',
+      address: '12 rue des Ateliers',
+      city: 'Metz',
+      zipcode: '57000',
+      latitude: 49.1193,
+      longitude: 6.1757,
+    });
+    siteId = site.id;
 
-    const category = await request(app.getHttpServer())
-      .post('/categories')
-      .send({ name: 'Accident', isActive: true })
-      .expect(201);
-    categoryId = (category.body as { id: number }).id;
+    const category = await send<{ id: number }>('category.create', {
+      name: 'Accident',
+      isActive: true,
+    });
+    categoryId = category.id;
   });
 
   afterAll(async () => {
@@ -352,23 +351,18 @@ describe('Incidents (e2e)', () => {
     it('supprime les interventions rattachées à un incident supprimé', async () => {
       const incident = await createIncident({ callerId: TOULON });
 
-      const intervention = await request(app.getHttpServer())
-        .post('/interventions')
-        .send({
-          incidentId: incident.id,
-          siteId,
-          startAt: new Date().toISOString(),
-          workNote: 'remplacement du feu',
-        })
-        .expect(201);
+      const intervention = await send<{ id: number }>('intervention.create', {
+        incidentId: incident.id,
+        siteId,
+        startAt: new Date().toISOString(),
+        workNote: 'remplacement du feu',
+      });
 
       await send('incident.remove', { id: incident.id, callerId: TOULON });
 
-      const interventionId = (intervention.body as { id: number }).id;
-      const res = await request(app.getHttpServer())
-        .get(`/interventions/${interventionId}`)
-        .expect(200);
-      expect(res.body).toEqual({});
+      await expect(
+        send('intervention.findOne', intervention.id),
+      ).resolves.toBeFalsy();
     });
 
     it('refuse une intervention sur un incident inconnu', async () => {
@@ -379,6 +373,40 @@ describe('Incidents (e2e)', () => {
           startAt: new Date().toISOString(),
         }),
       ).rejects.toMatchObject({ statusCode: 404 });
+    });
+  });
+
+  describe('accès direct en http', () => {
+    it('refuse la création d un incident sans passer par la gateway', async () => {
+      await request(app.getHttpServer())
+        .post('/incidents')
+        .send(payload())
+        .expect(403);
+    });
+
+    it('refuse la suppression d un incident', async () => {
+      const incident = await createIncident({ callerId: TOULON });
+
+      await request(app.getHttpServer())
+        .delete(`/incidents/${incident.id}`)
+        .expect(403);
+
+      const found = await send<IncidentEntity>('incident.findOne', incident.id);
+      expect(found.id).toBe(incident.id);
+    });
+
+    it('refuse la lecture et l ajout de pièces jointes', async () => {
+      await request(app.getHttpServer()).get('/attachments').expect(403);
+      await request(app.getHttpServer())
+        .post('/attachments')
+        .send({ incidentId: 1, updatedBy: 1, contentUrl: 'http://exemple.fr' })
+        .expect(403);
+    });
+
+    it('refuse aussi les sites, les catégories et les interventions', async () => {
+      await request(app.getHttpServer()).get('/sites').expect(403);
+      await request(app.getHttpServer()).get('/categories').expect(403);
+      await request(app.getHttpServer()).get('/interventions').expect(403);
     });
   });
 });

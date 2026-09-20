@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SitesService } from './sites.service';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
+import { RpcOnlyGuard } from '../guards/rpc-only.guard';
 
+@UseGuards(RpcOnlyGuard)
 @Controller('sites')
 export class SitesController {
   constructor(private readonly sitesService: SitesService) {}
