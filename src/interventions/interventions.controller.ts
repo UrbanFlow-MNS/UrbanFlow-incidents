@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { InterventionsService } from './interventions.service';
 import { CreateInterventionDto } from './dto/create-intervention.dto';
 import { UpdateInterventionDto } from './dto/update-intervention.dto';
+import { RpcOnlyGuard } from '../guards/rpc-only.guard';
 
+@UseGuards(RpcOnlyGuard)
 @Controller('interventions')
 export class InterventionsController {
   constructor(private readonly interventionsService: InterventionsService) {}
