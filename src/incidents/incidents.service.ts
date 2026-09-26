@@ -20,6 +20,12 @@ const WRITE_ROLES = [
   UserRoleType.SUPERADMIN,
 ];
 
+const DELETE_ROLES = [
+  UserRoleType.ADMIN_TECHNICIAN,
+  UserRoleType.ADMIN_USER_CITY,
+  UserRoleType.SUPERADMIN,
+];
+
 @Injectable()
 export class IncidentsService implements OnModuleInit {
   private userService!: UserServiceClient;
@@ -132,6 +138,7 @@ export class IncidentsService implements OnModuleInit {
     if ((incident.agencyId ?? null) !== (caller?.agencyId ?? null)) {
       throw new NotFoundException(`Incident with id ${id} not found`);
     }
+    return caller;
   }
 
   async update(id: number, updateIncidentDto: UpdateIncidentDto, callerId?: number, callerRole?: string) {
@@ -150,7 +157,10 @@ export class IncidentsService implements OnModuleInit {
   }
 
   async remove(id: number, callerId?: number, callerRole?: string) {
-    await this.assertSameAgency(id, callerId, callerRole);
+    const caller = await this.assertSameAgency(id, callerId, callerRole);
+    if (caller && !DELETE_ROLES.includes(caller.role)) {
+      throw new ForbiddenException('You are not allowed to delete incidents');
+    }
     this.tripsClient.emit('incident.closed', { incidentId: id });
     return await this.incidentRepository.delete(id);
   }
