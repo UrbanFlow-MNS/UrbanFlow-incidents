@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /build
 
 COPY modules/proto/ ./proto/
@@ -10,7 +10,7 @@ RUN cd incidents && npm install --ignore-scripts
 COPY modules/incidents/ ./incidents/
 RUN cd incidents && npm run build
 
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app
 
 COPY modules/incidents/package*.json ./incidents/
