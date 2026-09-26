@@ -31,6 +31,7 @@ import { testDatabase } from './test-database';
 const TCP_PORT = 6099;
 
 const TOULON = 7;
+const ADMIN_TOULON = 5;
 const HYERES = 8;
 const SANS_AGENCE = 4;
 const SUPERADMIN = 6;
@@ -38,6 +39,7 @@ const VOYAGEUR = 9;
 
 const users: Record<number, { agencyId?: number; role: string }> = {
   [TOULON]: { agencyId: 1, role: 'USER_CITY' },
+  [ADMIN_TOULON]: { agencyId: 1, role: 'ADMIN_USER_CITY' },
   [HYERES]: { agencyId: 2, role: 'USER_CITY' },
   [SANS_AGENCE]: { role: 'TECHNICIAN' },
   [SUPERADMIN]: { role: 'SUPERADMIN' },
@@ -191,7 +193,7 @@ describe('Incidents (e2e)', () => {
     it('supprime un incident', async () => {
       const removed = await send<{ affected: number }>('incident.remove', {
         id: incidentId,
-        callerId: TOULON,
+        callerId: ADMIN_TOULON,
       });
 
       expect(removed.affected).toBe(1);
@@ -345,6 +347,14 @@ describe('Incidents (e2e)', () => {
         send('incident.remove', { id: created.id, callerId: VOYAGEUR }),
       ).rejects.toMatchObject({ statusCode: 403 });
     });
+
+    it('refuse la suppression d un incident par un agent de sa collectivité', async () => {
+      const created = await createIncident({ callerId: TOULON });
+
+      await expect(
+        send('incident.remove', { id: created.id, callerId: TOULON }),
+      ).rejects.toMatchObject({ statusCode: 403 });
+    });
   });
 
   describe('interventions liées', () => {
@@ -358,7 +368,10 @@ describe('Incidents (e2e)', () => {
         workNote: 'remplacement du feu',
       });
 
-      await send('incident.remove', { id: incident.id, callerId: TOULON });
+      await send('incident.remove', {
+        id: incident.id,
+        callerId: ADMIN_TOULON,
+      });
 
       await expect(
         send('intervention.findOne', intervention.id),

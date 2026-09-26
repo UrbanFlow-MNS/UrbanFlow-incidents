@@ -236,6 +236,9 @@ describe('IncidentsService', () => {
     it('deletes the incident and warns trips', async () => {
       incidentRepository.findOne.mockResolvedValue({ id: 3, agencyId: 1 });
       incidentRepository.delete.mockResolvedValue({ affected: 1 });
+      findOneById.mockReturnValue(
+        of({ user: { id: 7, agencyId: 1, role: 'ADMIN_USER_CITY' } }),
+      );
 
       await expect(service.remove(3, 7)).resolves.toEqual({ affected: 1 });
       expect(tripsClient.emit).toHaveBeenCalledWith('incident.closed', { incidentId: 3 });
@@ -246,6 +249,13 @@ describe('IncidentsService', () => {
       findOneById.mockReturnValue(of({ user: { id: 9, role: 'CLASSIC_USER' } }));
 
       await expect(service.remove(3, 9)).rejects.toThrow(ForbiddenException);
+      expect(incidentRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it('refuses an agent of the same agency', async () => {
+      incidentRepository.findOne.mockResolvedValue({ id: 3, agencyId: 1 });
+
+      await expect(service.remove(3, 7)).rejects.toThrow(ForbiddenException);
       expect(incidentRepository.delete).not.toHaveBeenCalled();
     });
 
